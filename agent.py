@@ -1,34 +1,39 @@
 from agents import Agent
-from health_tools.goal_analyzer import analyze_user_goal
-from health_tools.meal_planner import create_meal_plan
-from health_tools.workout_recommender import recommend_workout_based_on_goal
-from health_tools.scheduler import schedule_health_check
-from health_tools.tracker import monitor_progress
+from tools.goal_analyzer import goal_analyzer
+from tools.meal_planner import meal_planner
+from tools.workout_recommender import workout_recommender
+from tools.scheduler import checkin_scheduler
+from tools.tracker import progress_tracker
 
-from custom_agents.nutrition_expert_agent import DietGuidanceAdvisor
-from custom_agents.injury_support_agent import RehabFitnessAdvisor
-from custom_agents.escalation_agent import HumanSupportEscalator
+from custom_agents.nutrition_expert_agent import NutritionExpertAgent
+from custom_agents.injury_support_agent import InjurySupportAgent
+from custom_agents.escalation_agent import EscalationAgent
 
 from hooks import CustomRunHooks
 
-def build_health_wellness_agent(model_instance):
+
+def create_health_agent(model):
+    """Bundle specialised sub‑agents and core tools into one orchestrator."""
+    nutrition_agent = NutritionExpertAgent(model=model)
+    injury_agent = InjurySupportAgent(model=model)
+    escalation_agent = EscalationAgent(model=model)
+
     return Agent(
-        name="WellnessPlannerAgent",
+        name="HealthWellnessAgent",
         instructions=(
-            "Help users with goals, plans, tracking, and escalate to experts when needed."
+            "You are a holistic Health & Wellness assistant.  Work with users to clarify "
+            "fitness and nutrition goals, craft actionable plans, and track progress.  "
+            "When dietary constraints, injuries, or human escalation are needed, hand off "
+            "to the appropriate specialist agent."
         ),
-        model=model_instance,
+        model=model,
         tools=[
-            analyze_user_goal,
-            create_meal_plan,
-            recommend_workout_based_on_goal,
-            monitor_progress,
-            schedule_health_check,
+            goal_analyzer,
+            meal_planner,
+            workout_recommender,
+            progress_tracker,
+            checkin_scheduler,
         ],
-        handoffs=[
-            DietGuidanceAdvisor(model_instance),
-            RehabFitnessAdvisor(model_instance),
-            HumanSupportEscalator(model_instance)
-        ],
+        handoffs=[nutrition_agent, injury_agent, escalation_agent],
         hooks=CustomRunHooks(),
     )

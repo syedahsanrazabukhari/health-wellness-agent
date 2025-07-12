@@ -1,13 +1,23 @@
 from agents import Agent
-from health_tools.workout_recommender import recommend_workout_based_on_goal
+from tools.workout_recommender import workout_recommender
 from hooks import CustomRunHooks
 
-class RehabFitnessAdvisor(Agent):
-    def __init__(self, llm_model):
+
+class InjurySupportAgent(Agent):
+    """Suggests modified exercise plans that respect injury constraints."""
+
+    def __init__(self, model):
         super().__init__(
-            name="RehabFitnessAdvisor",
-            instructions="Provide injury-safe workout routines and fitness suggestions.",
-            model=llm_model,
-            tools=[recommend_workout_based_on_goal],
-            hooks=CustomRunHooks()
+            name="InjurySupportAgent",
+            instructions=(
+                "You are an Injury‑Aware Fitness Coach.  Provide gentle, evidence‑based "
+                "workout routines tailored to common injuries and recovery stages."
+            ),
+            model=model,
+            tools=[workout_recommender],
+            hooks=CustomRunHooks(),
         )
+    def run(self, *args, **kwargs):
+        """Run the agent with the provided arguments."""
+        # Call the parent run method to execute the agent's logic
+        return super().run(*args, **kwargs)

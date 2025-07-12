@@ -1,13 +1,14 @@
 from typing import List, Optional, Dict
 from pydantic import BaseModel
 
-class SessionContext(BaseModel):
-    user_name: str
-    user_id: int
-    target_goal: Optional[dict] = None
-    diet_choices: Optional[str] = None
-    exercise_plan: Optional[dict] = None
-    meal_suggestions: Optional[List[str]] = None
-    injury_details: Optional[str] = None
-    handoff_history: List[str] = []
-    progress_updates: List[Dict[str, str]] = []
+
+class UserSessionContext(BaseModel):
+    name: str
+    uid: int
+    goal: Optional[dict] = None
+    diet_preferences: Optional[str] = None
+    workout_plan: Optional[dict] = None
+    meal_plan: Optional[List[str]] = None
+    injury_notes: Optional[str] = None
+    handoff_logs: List[str] = []
+    progress_logs: List[Dict[str, str]] = []

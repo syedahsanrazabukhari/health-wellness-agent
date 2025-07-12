@@ -1,9 +1,3 @@
-from .escalation_agent import HumanSupportEscalator
-from .injury_support_agent import RehabFitnessAdvisor
-from .nutrition_expert_agent import DietGuidanceAdvisor
-
-__all__ = [
-    "HumanSupportEscalator",
-    "RehabFitnessAdvisor",
-    "DietGuidanceAdvisor"
-]
+from .escalation_agent import EscalationAgent  # noqa: F401
+from .injury_support_agent import InjurySupportAgent  # noqa: F401
+from .nutrition_expert_agent import NutritionExpertAgent  # noqa: F401

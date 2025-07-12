@@ -1,5 +1,3 @@
-import sys
-sys.stdout.reconfigure(encoding='utf-8')
 import os
 import sys
 import asyncio
@@ -17,73 +15,73 @@ from agents import (
 )
 from agents.run import RunConfig
 
-from context import SessionContext
-from guardrails import is_valid_goal_input, ensure_valid_output
-from agent import build_health_wellness_agent
+from context import UserSessionContext
+from guardrails import validate_goal_input, validate_output
+from agent import create_health_agent
 
-sys.path.append(os.path.dirname(__file__))
+# ── bootstrap ────────────────────────────────────────────────────────────────
 load_dotenv()
+PROJECT_ROOT = os.path.dirname(__file__)
+sys.path.append(PROJECT_ROOT)
 
-API_KEY = os.getenv("GEMINI_API_KEY")
-if not API_KEY:
-    raise EnvironmentError("GEMINI_API_KEY is missing in .env")
+api_key = os.getenv("GEMINI_API_KEY")
+if not api_key:
+    raise EnvironmentError("GEMINI_API_KEY missing – set it in your .env file")
 
-openai_client = AsyncOpenAI(
-    api_key=API_KEY,
-    base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+client = AsyncOpenAI(
+    api_key=api_key,
+    base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
 )
 
-model_instance = OpenAIChatCompletionsModel(
+chat_model = OpenAIChatCompletionsModel(
     model="gemini-2.0-flash",
-    openai_client=openai_client,
+    openai_client=client,
 )
 
-set_default_openai_client(client=openai_client, use_for_tracing=False)
+set_default_openai_client(client=client, use_for_tracing=False)
 set_default_openai_api("chat_completions")
-set_tracing_disabled(disabled=True)
+set_tracing_disabled(True)
 
-async def main():
-    wellness_agent = build_health_wellness_agent(model_instance)
+config = RunConfig(model=chat_model, model_provider=client, tracing_disabled=True)
 
-    user_ctx = RunContextWrapper(SessionContext(
-        user_name="User",
-        user_id=1,
-        target_goal=None,
-        diet_choices=None,
-        exercise_plan=None,
-        meal_suggestions=[],
-        injury_details=None,
-        handoff_history=[],
-        progress_updates=[]
-    ))
+# ── application loop ─────────────────────────────────────────────────────────
+async def main() -> None:
+    agent = create_health_agent(chat_model)
 
-    print("\n✅ Health & Wellness Agent Ready! Type your goals:\n")
+    # user context is stored in memory for this demo
+    user_context = RunContextWrapper(
+        UserSessionContext(
+            name="User",
+            uid=1,
+            meal_plan=[],
+        )
+    )
+
+    print("🟢 Type your question (or 'exit' to quit)\n")
 
     while True:
-        question = input("\nYour Input (or type 'exit'): ")
-        if question.lower() == "exit":
+        user_input = input("You: ")
+        if user_input.lower() == "exit":
             break
 
-        if not is_valid_goal_input(question):
-            print("\n⚠️ Invalid format. Try like: 'lose 5kg in 2 months'")
+        if not validate_goal_input(user_input):
+            print("🚫 Sorry, that didn't look like a goal – try again.")
             continue
 
-        print("\n💬 Assistant:")
+        print("\nAssistant:")
+        result = Runner.run_streamed(agent, input=user_input, context=user_context)
 
-        runner = Runner.run_streamed(wellness_agent, input=question, context=user_ctx)
-
-        async for event in runner.stream_events():
+        async for event in result.stream_events():
             if event.type == "run_item_stream_event":
                 if event.item.type == "tool_call_item":
-                    print(f"[Tool Called] {getattr(event.item, 'tool', 'Unknown')}")
+                    print(f"[Tool ▶] {getattr(event.item, 'tool', 'unknown')}")
                 elif event.item.type == "tool_call_output_item":
-                    print(f"[Tool Output] {event.item.output}")
+                    print(f"[Tool ✔] {event.item.output}")
                 elif event.item.type == "message_output_item":
                     print(ItemHelpers.text_message_output(event.item))
 
-        output = runner.final_output
-        if not ensure_valid_output(output):
-            print("⚠️ Output validation failed.")
+        validate_output(result.final_output)
+
 
 if __name__ == "__main__":
     asyncio.run(main())
