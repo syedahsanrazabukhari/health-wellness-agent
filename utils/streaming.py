@@ -1,6 +1,9 @@
+import sys
+import asyncio
 
-def stream_response(step: dict) -> str:
-    """Render any streaming step, handling errors cleanly."""
-    if step.get("error"):
-        return f"🚨 Error: {step['error']}"
-    return str(step)
+async def stream_response(generator):
+    async for chunk in generator:
+        print(chunk, end="", flush=True)
+        await asyncio.sleep(0.05)
+    print()
+    print("\n[Streaming] Response complete.")

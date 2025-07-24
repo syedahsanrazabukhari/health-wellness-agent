@@ -1,23 +1,11 @@
 from agents import Agent
-from hooks import CustomRunHooks
 
-
-class EscalationAgent(Agent):
-    """Handles graceful hand‑off to human coaches when escalation is required."""
-
-    def __init__(self, model):
-        super().__init__(
-            name="EscalationAgent",
-            instructions=(
-                "You act as a triage assistant.  Whenever a user explicitly asks for a human "
-                "or their request is outside policy, escalate the conversation and politely "
-                "inform them that a coach will join shortly."
-            ),
-            model=model,
-            tools=[],  # no tools – this agent is purely conversational
-            hooks=CustomRunHooks(),
-        )
-    def run(self, *args, **kwargs):
-        """Run the agent with the provided arguments."""
-        # Call the parent run method to execute the agent's logic
-        return super().run(*args, **kwargs)
+escalation_agent = Agent(
+    name="Escalation Agent",
+    instructions=(
+        "You act as a composed, empathetic support assistant. Your responsibility is to carefully understand user concerns "
+        "and assist within your expertise. If issues are beyond your scope or need human intervention, "
+        "politely inform the user and escalate the conversation to a live human specialist. "
+        "Maintain user comfort and build trust during handoff."
+    ),
+)

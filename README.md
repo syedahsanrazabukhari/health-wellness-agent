@@ -15,37 +15,6 @@ A conversational AI assistant that helps users set health goals, get personalize
 - Schedules future wellness check-ins
 - Escalates to a human coach when the request requires it
 
----
-
-## 📁 Project Structure
-
-health-wellness-agent/
-│
-├── custom_agents/ # Specialized agent classes
-│ ├── escalation_agent.py # Escalates to human coach
-│ ├── injury_support_agent.py # Provides injury-safe workouts
-│ └── nutrition_expert_agent.py # Handles dietary requests
-│
-├── tools/ # Functional tools for planning & tracking
-│ ├── goal_analyzer.py
-│ ├── meal_planner.py
-│ ├── workout_recommender.py
-│ ├── scheduler.py
-│ └── tracker.py
-│
-├── utils/
-│ └── streaming.py # Output streaming helper
-│
-├── agent.py # Orchestrator agent factory
-├── context.py # Session context model (Pydantic)
-├── guardrails.py # Input & output validation
-├── hooks.py # Tool and agent lifecycle tracing
-├── main.py # CLI entry point
-├── .env # Gemini API key config
-├── gitignore
-├── requirements.txt
-└── README.md # You're reading it
-
 ## 🛠️ Getting Started
 
 ```bash
@@ -112,28 +81,6 @@ hi
 - workout_recommender Recommends simple routines based on goal.
 - progress_tracker Logs progress with encouragement.
 - checkin_scheduler Schedules weekly or daily health check-ins.
-
-## 🛡️ Input Validation
-
-The app uses smart filtering to allow natural prompts while blocking clearly inappropriate or irrelevant messages.
-
-### ✅ Accepts
-
-- "I want to lose 5kg"
-
-- "hello", "hi"
-
-- "track my progress"
-
-- "schedule a workout"
-
-### ❌ Rejects
-
-- Empty strings
-
-- Profanity or abusive language
-
-- Nonsense like "asdjlk"
 
 ## 🧱 Tech Stack
 

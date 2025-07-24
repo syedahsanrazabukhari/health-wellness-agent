@@ -1,12 +1,14 @@
-from agents import function_tool
+from agents import function_tool, RunContextWrapper
+from pydantic import BaseModel
+from datetime import datetime
 
+class ProgressEntry(BaseModel):
+    timestamp: str
+    note: str
 
 @function_tool
-def progress_tracker(metric: str = "steps") -> str:
-    """Send back a motivational nudge for the metric being tracked."""
-    return f"📊 Tracking **{metric}** – keep the momentum rolling!"
-
-
-def track_progress():
-    """Placeholder – hook into persistent storage later."""
-    return "(future) persisted progress log"
+async def track_progress(ctx: RunContextWrapper, log: str) -> ProgressEntry:
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    entry = {"timestamp": now, "note": log}
+    ctx.context.progress_logs.append(entry)
+    return ProgressEntry(timestamp=now, note=log)

@@ -1,23 +1,14 @@
 from agents import Agent
-from tools.meal_planner import meal_planner
-from hooks import CustomRunHooks
+from tools.meal_planner import plan_meals
 
-
-class NutritionExpertAgent(Agent):
-    """Recommends meal plans accounting for allergies, diabetes, etc."""
-
-    def __init__(self, model):
-        super().__init__(
-            name="NutritionExpertAgent",
-            instructions=(
-                "You are a Registered Dietitian.  Craft balanced meal plans and substitutions "
-                "for users who have medical or cultural dietary restrictions."
-            ),
-            model=model,
-            tools=[meal_planner],
-            hooks=CustomRunHooks(),
-        )
-    def run(self, *args, **kwargs):
-        """Run the agent with the provided arguments."""
-        # Call the parent run method to execute the agent's logic
-        return super().run(*args, **kwargs)
+nutrition_expert_agent = Agent(
+    name="Nutrition Expert Agent",
+    instructions=(
+        "You serve as a licensed nutritionist providing customized meal and dietary plans for users with diverse health conditions "
+        "like diabetes, hypertension, PCOS, allergies, or other medical needs. "
+        "Ask detailed questions to understand goals, preferences, and restrictions. "
+        "Offer evidence-based, culturally relevant advice and encourage consulting medical professionals when needed. "
+        "Emphasize sustainable, balanced nutrition and user empowerment."
+    ),
+    tools=[plan_meals]
+)

@@ -1,39 +1,42 @@
 from agents import Agent
-from tools.goal_analyzer import goal_analyzer
-from tools.meal_planner import meal_planner
-from tools.workout_recommender import workout_recommender
-from tools.scheduler import checkin_scheduler
-from tools.tracker import progress_tracker
+from output_guardrails import health_output_guardrail
+from input_guardrails import health_input_guardrail
 
-from custom_agents.nutrition_expert_agent import NutritionExpertAgent
-from custom_agents.injury_support_agent import InjurySupportAgent
-from custom_agents.escalation_agent import EscalationAgent
+from tools.goal_analyzer import analyze_health_goal
+from tools.meal_planner import plan_meals
+from tools.workout_recommender import recommend_workout
+from tools.tracker import track_progress
+from tools.scheduler import schedule_checkins
+
+from custom_agents.nutrition_expert_agent import nutrition_expert_agent
+from custom_agents.injury_support_agent import injury_support_agent
+from custom_agents.escalation_agent import escalation_agent
 
 from hooks import CustomRunHooks
 
-
 def create_health_agent(model):
-    """Bundle specialised sub‑agents and core tools into one orchestrator."""
-    nutrition_agent = NutritionExpertAgent(model=model)
-    injury_agent = InjurySupportAgent(model=model)
-    escalation_agent = EscalationAgent(model=model)
+    nutrition_agent = nutrition_expert_agent
+    injury_agent = injury_support_agent
+    escalation_agent_ref = escalation_agent
 
     return Agent(
         name="HealthWellnessAgent",
         instructions=(
-            "You are a holistic Health & Wellness assistant.  Work with users to clarify "
-            "fitness and nutrition goals, craft actionable plans, and track progress.  "
-            "When dietary constraints, injuries, or human escalation are needed, hand off "
-            "to the appropriate specialist agent."
+            "You are a helpful Health & Wellness Assistant. Assist users by understanding and breaking down "
+            "complex queries into actionable tasks like goal analysis, meal planning, workout recommendations, "
+            "progress tracking, and scheduling check-ins. Use specialized agents when necessary. "
+            "Keep tone supportive and clear."
         ),
         model=model,
         tools=[
-            goal_analyzer,
-            meal_planner,
-            workout_recommender,
-            progress_tracker,
-            checkin_scheduler,
+            analyze_health_goal,
+            plan_meals,
+            recommend_workout,
+            track_progress,
+            schedule_checkins
         ],
-        handoffs=[nutrition_agent, injury_agent, escalation_agent],
+        handoffs=[nutrition_agent, injury_agent, escalation_agent_ref],
         hooks=CustomRunHooks(),
+        input_guardrails=[health_input_guardrail],
+        output_guardrails=[health_output_guardrail]
     )
