@@ -29,7 +29,8 @@ async def health_input_guardrail(
 ) -> GuardrailFunctionOutput:
     try:
         result = await Runner.run(input_validation_agent, input_data, context=ctx.context, run_config=config)
-        output_data = result.agent_output  # ✅ Extract this properly
+        output_data = result.final_output  # Use final_output for the model output
+
         return GuardrailFunctionOutput(
             output_info=output_data,
             tripwire_triggered=not output_data.is_relevant
